@@ -47,7 +47,9 @@ class HeatmapManager {
 	processing: boolean;
 	_gitIndex: vscode.Uri;
 	private colorDecorations: vscode.TextEditorDecorationType[];
+	private workspaceConfig: vscode.WorkspaceConfiguration;
     constructor(context: vscode.ExtensionContext) {
+		this.workspaceConfig = vscode.workspace.getConfiguration('defect-heatmap');
 		this.context = context;
 		this.cache = undefined;
 		this.waitingOnCache = this.initializeCache();
@@ -98,9 +100,8 @@ class HeatmapManager {
 	}
 	async collectFiles(): Promise<[[vscode.TextDocument, string | Int32Array][], number]> {
 		await this.waitingOnCache;
-		const workspaceConfig = vscode.workspace.getConfiguration('defect-heatmap');
-		const include: string = <string>workspaceConfig.get('include');
-		const exclude: string | undefined | null = workspaceConfig.get('enableExclude') ? (workspaceConfig.get('exclude') || null): undefined;
+		const include: string = <string>this.workspaceConfig.get('include');
+		const exclude: string | undefined | null = this.workspaceConfig.get('enableExclude') ? (this.workspaceConfig.get('exclude') || null): undefined;
 		const files = await vscode.workspace.findFiles(include, exclude);
 		const filesThatNeedToBeUpdated: [vscode.TextDocument, string | Int32Array][] = [];
 		const self = this;
@@ -200,7 +201,8 @@ class HeatmapManager {
 
 	}
 	getGitLogCountForLineOfFile(filePath: string, lineNumber: number): number {
-		const command = `git log --no-patch -L ${lineNumber},${lineNumber}:${filePath} --pretty="%h"`;
+		const extraGitArgs: string = <string>this.workspaceConfig.get('extraGitArgs');
+		const command = `git log --no-patch -L ${lineNumber},${lineNumber}:${filePath} --pretty="%h" ${extraGitArgs}`;
 		const logs = execSync(command, {cwd: vscode.workspace.rootPath!}).toString();
 		// logs have trailing new line, even when there's only one relevant
 		// commit, so reduce the number by one for the true count.

@@ -32,6 +32,11 @@
 					"type": "string",
 					"default": "",
 					"markdownDescription": "A [glob pattern](https://code.visualstudio.com/api/references/vscode-api#GlobPattern) that defines the files and folders to exclude. The glob pattern will be matched against the file paths of resulting matches relative to their workspace. When `undefined` only default excludes will apply, when `null` no excludes will apply. If enabled, but left blank, it will be treated as `null`.\n\nWarning: The more files that are included, the longer it will take to generate the heatmap."
+				},
+				"defect-heatmap.extraGitArgs": {
+					"type": "string",
+					"default": "",
+					"markdownDescription": "The value of this field will be added, as is, onto the end of the `git` command used to fetch the logs for each line."
 				}
 			}
 		},
