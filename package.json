@@ -2,6 +2,7 @@
 	"name": "defect-heatmap",
 	"displayName": "Defect Heatmap",
 	"description": "Visualize problematic lines of code",
+	"publisher": "salmonmode",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.49.0"
