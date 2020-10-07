@@ -95,6 +95,12 @@ class HeatmapManager {
 		const [collectedFiles, totalLines] = await this.collectFiles();
 		await this.buildHeatmapCacheForCollectedFiles(collectedFiles, totalLines);
 		this.buildHottestToCoolest();
+		if (this.cache.hottestToCoolest <= 0) {
+			vscode.window.showWarningMessage('Couldn\'t gather sufficient data to generate a heatmap with current settings. File matching settings or extra git command args may be too strict.');
+			this.wipeOutDecorations();
+			this.processing = false;
+			return;
+		}
 		await this.renderHeatmapForVisibleTextEditors();
 		this.processing = false;
 	}
@@ -221,9 +227,7 @@ class HeatmapManager {
 		this.cache.hottestToCoolest.sort((fileA: FileHeatmapFull, fileB: FileHeatmapFull) => fileB.hottest - fileA.hottest);
 	}
 	async renderHeatmapForVisibleTextEditors() {
-		while (this.colorDecorations.length > 0){
-			this.colorDecorations.pop()!.dispose();
-		}
+		this.wipeOutDecorations();
 		const maxTemp: number = this.cache!.hottestToCoolest[0]!.hottest!;
 		const heatmap: RepoHeatmap = this.cache!.temps!;
 		for (let textEditor of vscode.window.visibleTextEditors){
@@ -258,5 +262,10 @@ class HeatmapManager {
 			throw Error(`Invalid tempPercent: ${tempPercent}`);
 		}
 		return new vscode.Color(red, green, blue, 0.5);
+	}
+	wipeOutDecorations() {
+		while (this.colorDecorations.length > 0){
+			this.colorDecorations.pop()!.dispose();
+		}
 	}
 }
