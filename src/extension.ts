@@ -8,14 +8,20 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const heatmapManager = new HeatmapManager(context);
 
-	let disposable = vscode.commands.registerCommand('defect-heatmap.generate', () => {
+	let generateHeatmapDisposable = vscode.commands.registerCommand('defect-heatmap.generate', () => {
 		heatmapManager.generateHeatmap();
 		vscode.window.onDidChangeVisibleTextEditors(() => {
 			heatmapManager.renderHeatmapForVisibleTextEditors();
 		});
 	});
 
-	context.subscriptions.push(disposable);
+	context.subscriptions.push(generateHeatmapDisposable);
+
+	let showHeatmapReportDisposable = vscode.commands.registerCommand('defect-heatmap.showReport', () => {
+		displayHeatmapReport(context, heatmapManager);
+	});
+
+	context.subscriptions.push(showHeatmapReportDisposable);
 }
 
 // this method is called when your extension is deactivated
@@ -27,6 +33,8 @@ interface FileHeatmap {
 	hash: string | Int32Array;
 	temps: number[];
 	hottest: number;
+	hottestLineIndex: number;
+	overall: number;
 }
 
 interface FileHeatmapFull {
@@ -34,6 +42,8 @@ interface FileHeatmapFull {
 	hash: string | Int32Array;
 	temps: number[];
 	hottest: number;
+	hottestLineIndex: number;
+	overall: number;
 }
 
 type RepoHeatmap = Map<Filename, FileHeatmap>;
@@ -47,9 +57,8 @@ class HeatmapManager {
 	processing: boolean;
 	_gitIndex: vscode.Uri;
 	private colorDecorations: vscode.TextEditorDecorationType[];
-	private workspaceConfig: vscode.WorkspaceConfiguration;
+	initialHeatmapCacheBuilt: boolean;
     constructor(context: vscode.ExtensionContext) {
-		this.workspaceConfig = vscode.workspace.getConfiguration('defect-heatmap');
 		this.context = context;
 		this.cache = undefined;
 		this.waitingOnCache = this.initializeCache();
@@ -57,6 +66,10 @@ class HeatmapManager {
 		this._gitIndex = this._getGitIndex();
 		this.gitWatcher = this.initializeGitWatcher();
 		this.colorDecorations = <vscode.TextEditorDecorationType[]>[];
+		this.initialHeatmapCacheBuilt = false;
+	}
+	get workspaceConfig(): vscode.WorkspaceConfiguration {
+		return vscode.workspace.getConfiguration('defect-heatmap');
 	}
 	_getGitIndex(): vscode.Uri {
 		const rootUri = vscode.Uri.file(vscode.workspace.rootPath!);
@@ -75,8 +88,8 @@ class HeatmapManager {
 		if (!('temps' in this.cache)) {
 			this.cache.temps = new Map() as RepoHeatmap;
 		}
-		if (!('hottestToCoolest' in this.cache!)) {
-			this.cache.hottestToCoolest = <FileHeatmapFull[]>[];
+		if (!('hottestToCoolestHotspots' in this.cache!)) {
+			this.cache.hottestToCoolestHotspots = <FileHeatmapFull[]>[];
 		}
 	}
 	initializeGitWatcher(): vscode.FileSystemWatcher {
@@ -94,20 +107,23 @@ class HeatmapManager {
 		this.processing = true;
 		const [collectedFiles, totalLines] = await this.collectFiles();
 		await this.buildHeatmapCacheForCollectedFiles(collectedFiles, totalLines);
-		this.buildHottestToCoolest();
-		if (this.cache.hottestToCoolest <= 0) {
+		this.buildHottestToCoolestHotspots();
+		if (this.cache.hottestToCoolestHotspots <= 0) {
 			vscode.window.showWarningMessage('Couldn\'t gather sufficient data to generate a heatmap with current settings. File matching settings or extra git command args may be too strict.');
 			this.wipeOutDecorations();
 			this.processing = false;
 			return;
 		}
+		this.buildHottestToCoolestOverall();
 		await this.renderHeatmapForVisibleTextEditors();
+		this.initialHeatmapCacheBuilt = true;
 		this.processing = false;
 	}
 	async collectFiles(): Promise<[[vscode.TextDocument, string | Int32Array][], number]> {
 		await this.waitingOnCache;
 		const include: string = <string>this.workspaceConfig.get('include');
 		const exclude: string | undefined | null = this.workspaceConfig.get('enableExclude') ? (this.workspaceConfig.get('exclude') || null): undefined;
+
 		const files = await vscode.workspace.findFiles(include, exclude);
 		const filesThatNeedToBeUpdated: [vscode.TextDocument, string | Int32Array][] = [];
 		const self = this;
@@ -215,7 +231,8 @@ class HeatmapManager {
 			heatCounts.push(logCount);
 		}
 		const hottest = Math.max(...heatCounts);
-		heatmap.set(filePath, {hash: fileHash, temps: heatCounts, hottest: hottest});
+		const fileTemperature = this.getGitLogCountForEntireFile(filePath);
+		heatmap.set(filePath, {hash: fileHash, temps: heatCounts, hottest: hottest, hottestLineIndex: heatCounts.indexOf(hottest) + 1, overall: fileTemperature});
 
 	}
 	getGitLogCountForLineOfFile(filePath: string, lineNumber: number): number {
@@ -226,21 +243,48 @@ class HeatmapManager {
 		// commit, so reduce the number by one for the true count.
 		return logs.split('\n').length - 1;
 	}
-	buildHottestToCoolest() {
+	getGitLogCountForEntireFile(filePath: string): number {
+		const extraGitArgs: string = <string>this.workspaceConfig.get('extraGitArgs');
+		const command = `git log --no-patch --pretty="%h" ${extraGitArgs} ${filePath}`;
+		const logs = execSync(command, {cwd: vscode.workspace.rootPath!}).toString();
+		// logs have trailing new line, even when there's only one relevant
+		// commit, so reduce the number by one for the true count.
+		return logs.split('\n').length - 1;
+	}
+	buildHottestToCoolestHotspots() {
 		// reset the array so that stale values aren't factored in
-		this.cache!.hottestToCoolest = <FileHeatmapFull[]>[];
+		this.cache!.hottestToCoolestHotspots = <FileHeatmapFull[]>[];
 		const self = this;
 		if (this.cache!.temps.size === 0) {
 			return;
 		}
 		this.cache!.temps.forEach((value: FileHeatmap, key: string, map: RepoHeatmap) => {
-			self.cache.hottestToCoolest.push({filePath: key, ...value});
+			self.cache.hottestToCoolestHotspots.push({filePath: key, ...value});
 		});
-		this.cache.hottestToCoolest.sort((fileA: FileHeatmapFull, fileB: FileHeatmapFull) => fileB.hottest - fileA.hottest);
+		this.cache.hottestToCoolestHotspots.sort((fileA: FileHeatmapFull, fileB: FileHeatmapFull) => fileB.hottest - fileA.hottest);
+	}
+	buildHottestToCoolestOverall() {
+		// reset the array so that stale values aren't factored in
+		this.cache!.hottestToCoolestOverall = <FileHeatmapFull[]>[];
+		const self = this;
+		if (this.cache!.temps.size === 0) {
+			return;
+		}
+		this.cache!.temps.forEach((value: FileHeatmap, key: string, map: RepoHeatmap) => {
+			self.cache.hottestToCoolestOverall.push({filePath: key, ...value});
+		});
+		this.cache.hottestToCoolestOverall.sort((fileA: FileHeatmapFull, fileB: FileHeatmapFull) => fileB.overall - fileA.overall);
 	}
 	async renderHeatmapForVisibleTextEditors() {
 		this.wipeOutDecorations();
-		const maxTemp: number = this.cache!.hottestToCoolest[0]!.hottest!;
+		// maxTemp should be based on the most changed line, rather than most changed file
+		// so the colors make it easier to identify where the problems are. If the most
+		// changed file was changed 200 times, but the most changed line was only changed 30
+		// times, and maxTemp was based off of the most changed file, then all the lines
+		// would be close to blue, making it more difficult to find where the problems are
+		// visually. But if based off of the most changed line, then lines changed 30 times
+		// would appear red.
+		const maxTemp: number = this.cache!.hottestToCoolestHotspots[0]!.hottest!;
 		const heatmap: RepoHeatmap = this.cache!.temps!;
 		for (let textEditor of vscode.window.visibleTextEditors){
 			if (!heatmap.has(textEditor.document.uri.fsPath)) {
@@ -263,7 +307,7 @@ class HeatmapManager {
 		if (tempPercent > 0.2) {
 			let adjustedPercent = ((tempPercent - 0.2) / 0.8);
 			blue = 0;
-			[red, green] = adjustedPercent < 0.5 ? [adjustedPercent, 1] : [1, adjustedPercent];
+			[red, green] = adjustedPercent < 0.5 ? [1 - adjustedPercent, 1] : [1, 1 - adjustedPercent];
 		} else if (tempPercent < 0.2) {
 			let adjustedPercent = tempPercent / 0.2;
 			red = 0;
@@ -281,3 +325,71 @@ class HeatmapManager {
 		}
 	}
 }
+
+
+async function displayHeatmapReport(context: vscode.ExtensionContext, heatmapManager: HeatmapManager) {
+	if (!heatmapManager.initialHeatmapCacheBuilt) {
+		await heatmapManager.generateHeatmap();
+	}
+	if (!heatmapManager.initialHeatmapCacheBuilt) {
+		return;
+	}
+	const cache: any = context.workspaceState.get('defectHeatmap');
+	const rootPathLength = vscode.workspace.rootPath!.length + 1;
+	// Distinguish between max line temp and max file temp here, so that the colors for overall
+	// file temps don't look closer to blue than they should be.
+	const maxLineTemp = cache.hottestToCoolestHotspots[0].hottest;
+	const maxFileTemp = cache.hottestToCoolestOverall[0].overall;
+	const lineTempTrows = cache.hottestToCoolestHotspots.map( (file: FileHeatmapFull) => {
+		const color = heatmapManager.getColorFromTemperaturePercent(file.hottest / maxLineTemp);
+		const backgroundColor = `rgba(${color.red * 100}%, ${color.green * 100}%, ${color.blue * 100}%, ${color.alpha * 100}%)`;
+		const relativeFilePath = file.filePath.slice(rootPathLength);
+		return `<tr><td style="background-color: ${backgroundColor}"></td><td>${relativeFilePath}:${file.hottestLineIndex}</td><td>${file.hottest}</td></tr>`;
+	});
+	const fileTempTrows = cache.hottestToCoolestOverall.map( (file: FileHeatmapFull) => {
+		const color = heatmapManager.getColorFromTemperaturePercent(file.overall / maxFileTemp);
+		const backgroundColor = `rgba(${color.red * 100}%, ${color.green * 100}%, ${color.blue * 100}%, ${color.alpha * 100}%)`;
+		const relativeFilePath = file.filePath.slice(rootPathLength);
+		return `<tr><td style="background-color: ${backgroundColor}"></td><td>${relativeFilePath}</td><td>${file.overall}</td></tr>`;
+	});
+	const html = `
+	<!doctype html>
+	<html lang=en>
+	<head>
+	<meta charset=utf-8>
+	<style>
+	td {
+		min-width:20px;
+	}
+	</style>
+	<title>Heatmap report</title>
+	</head>
+	<body>
+	<h1>Heatmap</h1>
+	<h3>Sorted from hottest to coldest</h3>
+	<h2>Hottest hotspots</h2>
+	<table>
+		<thead>
+			<th></th>
+			<th>File path</th>
+			<th>Temperature</th>
+		<thead/>
+		<tbody>
+			${lineTempTrows.join("")}
+		</tbody>
+	</table>
+	<h2>Hottest files</h2>
+	<table>
+		<thead>
+			<th></th>
+			<th>File path</th>
+			<th>Temperature</th>
+		<thead/>
+		<tbody>
+			${fileTempTrows.join("")}
+		</tbody>
+	</table>
+	`;
+	const panel = vscode.window.createWebviewPanel('html', 'Heatmap report', vscode.ViewColumn.Active);
+	panel.webview.html = html;
+;}

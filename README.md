@@ -22,20 +22,26 @@ git log --no-patch -L ${lineNumber},${lineNumber}:${filePath} --pretty="%h" -E -
 
 and it would only match commits that have messages that have lines starting with `fix:` or something similar (this is a pattern based on [Angular's commit message guidelines](https://github.com/angular/angular/blob/master/CONTRIBUTING.md)). Here's some commit messages it would match on:
 
-```
+```text
 fix: don't do the thing
 ```
 
-```
+```text
 feat: add button to do the thing
 
 * fix: don't do thing when not allowed
 ```
 
-```
+```text
 feat: add button to do the thing
 
 - fix: don't do thing when not allowed
+```
+
+When calculating individual file temperatures overall, those arguments will also be used, and it will look something like this:
+
+```shell
+git log --no-patch --pretty="%h" -E --grep='^[^a-zA-Z]*fix:' ${filePath}
 ```
 
 ## Requirements

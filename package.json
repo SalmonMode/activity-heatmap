@@ -11,7 +11,8 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:defect-heatmap.generate"
+		"onCommand:defect-heatmap.generate",
+		"onCommand:defect-heatmap.showReport"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -44,6 +45,10 @@
 			{
 				"command": "defect-heatmap.generate",
 				"title": "Generate heatmap"
+			},
+			{
+				"command": "defect-heatmap.showReport",
+				"title": "Show heatmap report"
 			}
 		]
 	},

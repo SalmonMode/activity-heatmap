@@ -9,6 +9,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Added
 
 - Extra git command args for getting logs for each line of each relevant file
+- Create report for hottest files/lines
 
 ### Fixed
 
@@ -17,4 +18,4 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [0.0.1] - 2020-10-07
 
-- Initial release
+- Initial releas
