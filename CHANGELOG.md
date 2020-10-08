@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+### Added
+
+- Command to hide heatmap overlay
+
 ## [1.1.0] - 2020-10-08
 
 ### Added

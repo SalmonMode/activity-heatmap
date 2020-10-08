@@ -22,6 +22,13 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(showHeatmapReportDisposable);
+
+	let hideHeatmapOverlay = vscode.commands.registerCommand('defect-heatmap.hideOverlay', () => {
+		heatmapManager.hideDecorations = true;
+		heatmapManager.wipeOutDecorations();
+	});
+
+	context.subscriptions.push(hideHeatmapOverlay);
 }
 
 // this method is called when your extension is deactivated
@@ -59,6 +66,7 @@ class HeatmapManager {
 	private colorDecorations: vscode.TextEditorDecorationType[];
 	matchedFiles?: string[];
 	initialHeatmapCacheBuilt: boolean;
+	hideDecorations: boolean;
     constructor(context: vscode.ExtensionContext) {
 		this.context = context;
 		this.cache = undefined;
@@ -68,6 +76,7 @@ class HeatmapManager {
 		this.gitWatcher = this.initializeGitWatcher();
 		this.colorDecorations = <vscode.TextEditorDecorationType[]>[];
 		this.initialHeatmapCacheBuilt = false;
+		this.hideDecorations = false;
 	}
 	get workspaceConfig(): vscode.WorkspaceConfiguration {
 		return vscode.workspace.getConfiguration('defect-heatmap');
@@ -106,6 +115,7 @@ class HeatmapManager {
 			return;
 		}
 		this.processing = true;
+		this.hideDecorations = false;
 		const [collectedFiles, totalLines] = await this.collectFiles();
 		await this.buildHeatmapCacheForCollectedFiles(collectedFiles, totalLines);
 		this.buildHottestToCoolestHotspots();
@@ -288,6 +298,9 @@ class HeatmapManager {
 	}
 	async renderHeatmapForVisibleTextEditors() {
 		this.wipeOutDecorations();
+		if (this.hideDecorations) {
+			return;
+		}
 		// maxTemp should be based on the most changed line, rather than most changed file
 		// so the colors make it easier to identify where the problems are. If the most
 		// changed file was changed 200 times, but the most changed line was only changed 30
