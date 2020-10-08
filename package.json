@@ -76,5 +76,10 @@
 	"dependencies": {
 		"gitlog": "^4.0.3",
 		"ts-md5": "^1.2.7"
-	}
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/SalmonMode/defect-heatmap.git"
+	  },
+	  "homepage": "https://github.com/SalmonMode/defect-heatmap"
 }
