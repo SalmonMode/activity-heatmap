@@ -57,6 +57,7 @@ class HeatmapManager {
 	processing: boolean;
 	_gitIndex: vscode.Uri;
 	private colorDecorations: vscode.TextEditorDecorationType[];
+	matchedFiles?: string[];
 	initialHeatmapCacheBuilt: boolean;
     constructor(context: vscode.ExtensionContext) {
 		this.context = context;
@@ -125,6 +126,7 @@ class HeatmapManager {
 		const exclude: string | undefined | null = this.workspaceConfig.get('enableExclude') ? (this.workspaceConfig.get('exclude') || null): undefined;
 
 		const files = await vscode.workspace.findFiles(include, exclude);
+		this.matchedFiles = <string[]>[];
 		const filesThatNeedToBeUpdated: [vscode.TextDocument, string | Int32Array][] = [];
 		const self = this;
 		let totalLines = 0;
@@ -143,6 +145,7 @@ class HeatmapManager {
 			const incrementPerFile = 100 / files.length;
 
 			for (let file of files) {
+				self.matchedFiles.push(file.fsPath);
 				let filePath: string = file.fsPath;
 				progress.report({ increment: incrementPerFile, message: filePath });
 				await new Promise(r => setTimeout(r, 0));
@@ -258,8 +261,12 @@ class HeatmapManager {
 		if (this.cache!.temps.size === 0) {
 			return;
 		}
-		this.cache!.temps.forEach((value: FileHeatmap, key: string, map: RepoHeatmap) => {
-			self.cache.hottestToCoolestHotspots.push({filePath: key, ...value});
+		this.cache!.temps.forEach((value: FileHeatmap, filePath: string, map: RepoHeatmap) => {
+			if (!self.matchedFiles.includes(filePath)) {
+				// file wasn't matched by given current extension configuration
+				return;
+			}
+			self.cache.hottestToCoolestHotspots.push({filePath: filePath, ...value});
 		});
 		this.cache.hottestToCoolestHotspots.sort((fileA: FileHeatmapFull, fileB: FileHeatmapFull) => fileB.hottest - fileA.hottest);
 	}
@@ -270,8 +277,12 @@ class HeatmapManager {
 		if (this.cache!.temps.size === 0) {
 			return;
 		}
-		this.cache!.temps.forEach((value: FileHeatmap, key: string, map: RepoHeatmap) => {
-			self.cache.hottestToCoolestOverall.push({filePath: key, ...value});
+		this.cache!.temps.forEach((value: FileHeatmap, filePath: string, map: RepoHeatmap) => {
+			if (!self.matchedFiles.includes(filePath)) {
+				// file wasn't matched by given current extension configuration
+				return;
+			}
+			self.cache.hottestToCoolestOverall.push({filePath: filePath, ...value});
 		});
 		this.cache.hottestToCoolestOverall.sort((fileA: FileHeatmapFull, fileB: FileHeatmapFull) => fileB.overall - fileA.overall);
 	}
