@@ -130,6 +130,9 @@ class HeatmapManager {
 				let filePath: string = file.fsPath;
 				progress.report({ increment: incrementPerFile, message: filePath });
 				await new Promise(r => setTimeout(r, 0));
+				if (!self.fileIsTrackedByGit(filePath)) {
+					continue;
+				}
 				let fileDetails: vscode.TextDocument;
 				try {
 					fileDetails = await vscode.workspace.openTextDocument(vscode.Uri.file(filePath));
@@ -151,6 +154,15 @@ class HeatmapManager {
 			}
 		});
 		return [filesThatNeedToBeUpdated, totalLines];
+	}
+	fileIsTrackedByGit(filePath: string): boolean {
+		try {
+			execSync(`git ls-files --error-unmatch ${filePath}`, {cwd: vscode.workspace.rootPath!});
+		} catch (error) {
+			// must not be tracked
+			return false;
+		}
+		return true;
 	}
 	getHashForFile(fileDetails: vscode.TextDocument): string {
 		return execSync(`git hash-object ${fileDetails.uri.fsPath}`, {cwd: vscode.workspace.rootPath!}).toString();

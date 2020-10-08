@@ -13,6 +13,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Fixed
 
 - Don't try to render heatmap decorations when no commits were found
+- Skip files that aren't tracked by git
 
 ## [0.0.1] - 2020-10-07
 
