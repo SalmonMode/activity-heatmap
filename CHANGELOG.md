@@ -14,6 +14,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - Recheck files before displaying report in case the heatmap needs to be rebuilt
 - Filter out unmatched files from heatmap report
+- Add non-null assertion
 
 ## [1.0.0] - 2020-10-08
 

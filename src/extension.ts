@@ -145,7 +145,7 @@ class HeatmapManager {
 			const incrementPerFile = 100 / files.length;
 
 			for (let file of files) {
-				self.matchedFiles.push(file.fsPath);
+				self.matchedFiles!.push(file.fsPath);
 				let filePath: string = file.fsPath;
 				progress.report({ increment: incrementPerFile, message: filePath });
 				await new Promise(r => setTimeout(r, 0));
@@ -262,7 +262,7 @@ class HeatmapManager {
 			return;
 		}
 		this.cache!.temps.forEach((value: FileHeatmap, filePath: string, map: RepoHeatmap) => {
-			if (!self.matchedFiles.includes(filePath)) {
+			if (!self.matchedFiles!.includes(filePath)) {
 				// file wasn't matched by given current extension configuration
 				return;
 			}
@@ -278,7 +278,7 @@ class HeatmapManager {
 			return;
 		}
 		this.cache!.temps.forEach((value: FileHeatmap, filePath: string, map: RepoHeatmap) => {
-			if (!self.matchedFiles.includes(filePath)) {
+			if (!self.matchedFiles!.includes(filePath)) {
 				// file wasn't matched by given current extension configuration
 				return;
 			}
