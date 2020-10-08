@@ -9,6 +9,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Added
 
 - Command to hide heatmap overlay
+- "Defect Heatmap:" prefix on commands in command palette
 
 ## [1.1.0] - 2020-10-08
 

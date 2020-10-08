@@ -45,15 +45,15 @@
 		"commands": [
 			{
 				"command": "defect-heatmap.generate",
-				"title": "Generate heatmap"
+				"title": "Defect Heatmap: Generate heatmap"
 			},
 			{
 				"command": "defect-heatmap.showReport",
-				"title": "Show heatmap report"
+				"title": "Defect Heatmap: Show heatmap report"
 			},
 			{
 				"command": "defect-heatmap.hideOverlay",
-				"title": "Hide heatmap color overlay"
+				"title": "Defect Heatmap: Hide heatmap color overlay"
 			}
 		]
 	},
