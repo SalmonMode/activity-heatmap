@@ -6,6 +6,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [1.0.0] - 2020-10-08
+
 ### Added
 
 - Extra git command args for getting logs for each line of each relevant file
