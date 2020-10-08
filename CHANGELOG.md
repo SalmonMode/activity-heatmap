@@ -10,6 +10,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - Repo details in manifest
 
+### Fixed
+
+- Recheck files before displaying report in case the heatmap needs to be rebuilt
+
 ## [1.0.0] - 2020-10-08
 
 ### Added

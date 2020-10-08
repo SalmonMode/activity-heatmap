@@ -184,7 +184,7 @@ class HeatmapManager {
 		return execSync(`git hash-object ${fileDetails.uri.fsPath}`, {cwd: vscode.workspace.rootPath!}).toString();
 	}
 	fileNeedsToBeUpdated(filePath: string, fileHash: string | Int32Array): boolean {
-		if (this.cache!.temps!.has() && this.cache!.temps!.get(filePath)?.hash === fileHash) {
+		if (this.cache!.temps!.has(filePath) && this.cache!.temps!.get(filePath)?.hash === fileHash) {
 			// doesn't need to be processed
 			return false;
 		}
@@ -328,9 +328,7 @@ class HeatmapManager {
 
 
 async function displayHeatmapReport(context: vscode.ExtensionContext, heatmapManager: HeatmapManager) {
-	if (!heatmapManager.initialHeatmapCacheBuilt) {
-		await heatmapManager.generateHeatmap();
-	}
+	await heatmapManager.generateHeatmap();
 	if (!heatmapManager.initialHeatmapCacheBuilt) {
 		return;
 	}
