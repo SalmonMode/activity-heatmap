@@ -39,6 +39,16 @@
 					"type": "string",
 					"default": "",
 					"markdownDescription": "The value of this field will be added, as is, onto the end of the `git` command used to fetch the logs for each line."
+				},
+				"defect-heatmap.countMatch.enable": {
+					"type": "boolean",
+					"default": false,
+					"markdownDescription": "Enable calculating the temperature of a line by counting either the number of times a given pattern is matched in the commit messages for that line, or the number of lines returned by the git command for that line. This is useful for when multiple commit messages might be bundled together, like with an octopus merge, or you want to have a highly customized way of calculating the temperature of each line."
+				},
+				"defect-heatmap.countMatch.pattern": {
+					"type": "string",
+					"default": "",
+					"markdownDescription": "If enabled, and `pattern matches` is set, the number of matches found for this regex pattern in the output of the `git log` command will be the temperature for that line."
 				}
 			}
 		},

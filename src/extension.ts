@@ -244,25 +244,50 @@ class HeatmapManager {
 			heatCounts.push(logCount);
 		}
 		const hottest = Math.max(...heatCounts);
-		const fileTemperature = this.getGitLogCountForEntireFile(filePath);
+		const fileTemperature = this.getGitLogCountForEntireFile(fileDetails);
 		heatmap.set(filePath, {hash: fileHash, temps: heatCounts, hottest: hottest, hottestLineIndex: heatCounts.indexOf(hottest) + 1, overall: fileTemperature});
 
 	}
 	getGitLogCountForLineOfFile(filePath: string, lineNumber: number): number {
 		const extraGitArgs: string = <string>this.workspaceConfig.get('extraGitArgs');
-		const command = `git log --no-patch -L ${lineNumber},${lineNumber}:${filePath} --pretty="%h" ${extraGitArgs}`;
-		const logs = execSync(command, {cwd: vscode.workspace.rootPath!}).toString();
-		// logs have trailing new line, even when there's only one relevant
-		// commit, so reduce the number by one for the true count.
-		return logs.split('\n').length - 1;
+		const countMatchEnabled: string = <string>this.workspaceConfig.get('countMatch.enable');
+		const command = `git log --no-patch --pretty="%h" -L ${lineNumber},${lineNumber}:${filePath} ${extraGitArgs}`;
+		let commandOutput: string;
+		try {
+			commandOutput = execSync(command, {cwd: vscode.workspace.rootPath!}).toString().trim();
+		} catch (error) {
+			// Could just mean a grep command didn't find any results, or could be something else. Best to log it anyway.
+			console.log(`Error while getting log: ${error}`);
+			return 0;
+		}
+		if (!commandOutput) {
+			return 0;
+		}
+		if (countMatchEnabled) {
+			const re = new RegExp(<string>this.workspaceConfig.get('countMatch.pattern'), 'gm');
+			return ((commandOutput || '').match(re) || []).length;
+		}
+		return commandOutput.split('\n').length;
 	}
-	getGitLogCountForEntireFile(filePath: string): number {
+	getGitLogCountForEntireFile(fileDetails: vscode.TextDocument): number {
 		const extraGitArgs: string = <string>this.workspaceConfig.get('extraGitArgs');
-		const command = `git log --no-patch --pretty="%h" ${extraGitArgs} ${filePath}`;
-		const logs = execSync(command, {cwd: vscode.workspace.rootPath!}).toString();
-		// logs have trailing new line, even when there's only one relevant
-		// commit, so reduce the number by one for the true count.
-		return logs.split('\n').length - 1;
+		const countMatchEnabled: string = <string>this.workspaceConfig.get('countMatch.enable');
+		const command = `git log --no-patch --pretty="%h" -L 1,${fileDetails.lineCount}:${fileDetails.uri.fsPath} ${extraGitArgs}`;
+		let commandOutput: string;
+		try {
+			commandOutput = execSync(command, {cwd: vscode.workspace.rootPath!}).toString().trim();
+		} catch (error) {
+			console.log(`Error while getting log: ${error}`);
+			return 0;
+		}
+		if (!commandOutput) {
+			return 0;
+		}
+		if (countMatchEnabled) {
+			const re = new RegExp(<string>this.workspaceConfig.get('countMatch.pattern'), 'gm');
+			return ((commandOutput || '').match(re) || []).length;
+		}
+		return commandOutput.split('\n').length;
 	}
 	buildHottestToCoolestHotspots() {
 		// reset the array so that stale values aren't factored in

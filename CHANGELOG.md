@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+### Added
+
+- Method to count temp by number of custom pattern matches
+
 ## [1.2.1] - 2020-10-09
 
 ### Changed
