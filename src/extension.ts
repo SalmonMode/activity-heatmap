@@ -132,8 +132,8 @@ class HeatmapManager {
 	}
 	async collectFiles(): Promise<[[vscode.TextDocument, string | Int32Array][], number]> {
 		await this.waitingOnCache;
-		const include: string = <string>this.workspaceConfig.get('include');
-		const exclude: string | undefined | null = this.workspaceConfig.get('enableExclude') ? (this.workspaceConfig.get('exclude') || null): undefined;
+		const include: string = <string>this.workspaceConfig.get('include.pattern');
+		const exclude: string | undefined | null = this.workspaceConfig.get('exclude.enable') ? (this.workspaceConfig.get('exclude.pattern') || null): undefined;
 
 		const files = await vscode.workspace.findFiles(include, exclude);
 		this.matchedFiles = <string[]>[];

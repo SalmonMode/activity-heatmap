@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+### Changed
+
+- Configuration setting amespaces for better grouping
+
 ## [1.2.0] - 2020-10-08
 
 ### Added

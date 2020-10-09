@@ -52,9 +52,9 @@ The workspace that is opened, must also be the folder that contains the `.git` f
 
 This extension contributes the following settings:
 
-* `defect-heatmap.include`: glob pattern for files to match
-* `defect-heatmap.enableExclude`: enable/disable the exclude pattern (uses default excludes if disabled)
-* `defect-heatmap.exclude`: glob pattern for excluding files/folders
+* `defect-heatmap.include.pattern`: glob pattern for files to match
+* `defect-heatmap.exclude.enable`: enable/disable the exclude pattern (uses default excludes if disabled)
+* `defect-heatmap.exclude.pattern`: glob pattern for excluding files/folders
 * `defect-heatmap.extraGitArgs`: any extra args to pass to the git command for each line
 
 ## Known Issues
