@@ -10,7 +10,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ### Changed
 
-- Configuration setting amespaces for better grouping
+- Configuration setting namespaces for better grouping
 
 ## [1.2.0] - 2020-10-08
 
