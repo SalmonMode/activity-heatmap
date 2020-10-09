@@ -2,7 +2,19 @@
 
 This extension allows you to visualize the areas of your code that are most often changed. The closer the color is to red, the more changes there were.
 
-To use once installed, open the command palette, and enter `Generate heatmap`.
+To use once installed, open the command palette, and enter `Generate heatmap`, or `Show heatmap report`.
+
+#### Hotspot and overall file temperature report
+
+![Hotspot heatmap](/images/hotspot_heatmap.png)
+
+![Hottest files heatmap](/images/hottest_files_heatmap.png)
+
+#### In-file overlay
+
+![Heatmap overlay](/images/overlay.png)
+
+(don't worry. it can be hidden with the `hide heatmap color overlay` command)
 
 The process can take a while, so be patient. The more files it has to iterate through, the longer it will take, so use the settings to be sure you're only looking at the files you care about.
 

@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+### Added
+
+- Pics to README
+
 ## [1.3.0] - 2020-10-09
 
 ### Added
