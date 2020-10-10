@@ -6,13 +6,13 @@ To use once installed, open the command palette, and enter `Generate heatmap`, o
 
 #### Hotspot and overall file temperature report
 
-![Hotspot heatmap](/images/hotspot_heatmap.png)
+![Hotspot heatmap](https://github.com/SalmonMode/defect-heatmap/raw/main/images/hotspot_heatmap.png)
 
-![Hottest files heatmap](/images/hottest_files_heatmap.png)
+![Hottest files heatmap](https://github.com/SalmonMode/defect-heatmap/raw/main/images/hottest_files_heatmap.png)
 
 #### In-file overlay
 
-![Heatmap overlay](/images/overlay.png)
+![Heatmap overlay](https://github.com/SalmonMode/defect-heatmap/raw/main/images/overlay.png)
 
 (don't worry. it can be hidden with the `hide heatmap color overlay` command)
 

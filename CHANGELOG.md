@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+### Fixed
+
+- Correct URLs for README images
+
 ## [1.3.1] - 2020-10-09
 
 ### Added
