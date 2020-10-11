@@ -1,4 +1,4 @@
-# defect-heatmap README
+# activity-heatmap README
 
 This extension allows you to visualize the areas of your code that are most often changed. The closer the color is to red, the more changes there were.
 
@@ -6,13 +6,13 @@ To use once installed, open the command palette, and enter `Generate heatmap`, o
 
 #### Hotspot and overall file temperature report
 
-![Hotspot heatmap](https://github.com/SalmonMode/defect-heatmap/raw/main/images/hotspot_heatmap.png)
+![Hotspot heatmap](https://github.com/SalmonMode/activity-heatmap/raw/main/images/hotspot_heatmap.png)
 
-![Hottest files heatmap](https://github.com/SalmonMode/defect-heatmap/raw/main/images/hottest_files_heatmap.png)
+![Hottest files heatmap](https://github.com/SalmonMode/activity-heatmap/raw/main/images/hottest_files_heatmap.png)
 
 #### In-file overlay
 
-![Heatmap overlay](https://github.com/SalmonMode/defect-heatmap/raw/main/images/overlay.png)
+![Heatmap overlay](https://github.com/SalmonMode/activity-heatmap/raw/main/images/overlay.png)
 
 (don't worry. it can be hidden with the `hide heatmap color overlay` command)
 
@@ -24,9 +24,9 @@ This extension uses the following `git` command to fetch the relevant commits fo
 git log --no-patch --pretty="%h" -L ${lineNumber},${lineNumber}:${filePath}
 ```
 
-If you want to add any extra args onto the end of that command, you can use the `defect-heatmap.extraGitArgs` option.
+If you want to add any extra args onto the end of that command, you can use the `activity-heatmap.extraGitArgs` option.
 
-For example, if you set `defect-heatmap.extraGitArgs` to `-E --grep='^[^a-zA-Z]*fix:'`, then the command would become:
+For example, if you set `activity-heatmap.extraGitArgs` to `-E --grep='^[^a-zA-Z]*fix:'`, then the command would become:
 
 ```shell
 git log --no-patch --pretty="%h" -L ${lineNumber},${lineNumber}:${filePath} -E --grep='^[^a-zA-Z]*fix:'
@@ -83,17 +83,17 @@ This can be useful if you have things like octopus merges, where several commits
 
 Note: in the event of an octopus merge, this tool won't be able to distinguish between the changes made by each individual commit that was part of the octopus merge, so be mindful when using this approach.
 
-If you enable `defect-heatmap.countMatch.enable`, and set `defect-heatmap.countMatch.method` to `pattern matches`, then this extension will use this `git` command (instead of the one from above):
+If you enable `activity-heatmap.countMatch.enable`, and set `activity-heatmap.countMatch.method` to `pattern matches`, then this extension will use this `git` command (instead of the one from above):
 
 ```shell
 git log -L ${lineNumber},${lineNumber}:${filePath} ${extraGitArgs}
 ```
 
-and the results will be parsed in JavaScript, where the pattern provided in `defect-heatmap.countMatch.pattern` will be used to count the matches.
+and the results will be parsed in JavaScript, where the pattern provided in `activity-heatmap.countMatch.pattern` will be used to count the matches.
 
 So it will be up to you to make sure the formatting of the commit messages will jive with the match pattern you're using.
 
-The `defect-heatmap.extraGitArgs` setting will still be used, giving you extra control over this though.
+The `activity-heatmap.extraGitArgs` setting will still be used, giving you extra control over this though.
 
 As an example, if you want to consider the following commit message as adding 2 to the line temperature:
 
@@ -103,15 +103,15 @@ fix: listen to the correct event
 - fix: don't do thing when not allowed
 ```
 
-then you can set `defect-heatmap.extraGitArgs` to `--pretty=full --no-patch -E --grep='^[^a-zA-Z]*fix:'`, and `defect-heatmap.countMatch.pattern` to `^[^a-zA-Z]*fix:`.
+then you can set `activity-heatmap.extraGitArgs` to `--pretty=full --no-patch -E --grep='^[^a-zA-Z]*fix:'`, and `activity-heatmap.countMatch.pattern` to `^[^a-zA-Z]*fix:`.
 
 ### More advanced
 
-If you want to use a more advanced means of determining a line's temperature, then one option is to leverage `defect-heatmap.extraGitArgs`, because whatever that's set to will be tacked on to the end of the command.
+If you want to use a more advanced means of determining a line's temperature, then one option is to leverage `activity-heatmap.extraGitArgs`, because whatever that's set to will be tacked on to the end of the command.
 
-For example, if you want to match on the same lines as before, and you're on a system with `grep`, you could set `defect-heatmap.extraGitArgs` to `--pretty=full --no-patch | grep -E '^[^a-zA-Z]*fix:'`.
+For example, if you want to match on the same lines as before, and you're on a system with `grep`, you could set `activity-heatmap.extraGitArgs` to `--pretty=full --no-patch | grep -E '^[^a-zA-Z]*fix:'`.
 
-This extension uses `--no-patch --pretty='%h'` by default, but these can be overridden by passing a new `--pretty` option or `--patch` (or both, depending on what you want to override) to `defect-heatmap.extraGitArgs` (`git` will use the last one provided).
+This extension uses `--no-patch --pretty='%h'` by default, but these can be overridden by passing a new `--pretty` option or `--patch` (or both, depending on what you want to override) to `activity-heatmap.extraGitArgs` (`git` will use the last one provided).
 
 ### Performance considerations
 
@@ -125,13 +125,13 @@ The workspace that is opened, must also be the folder that contains the `.git` f
 
 This extension contributes the following settings:
 
-* `defect-heatmap.include.pattern`: glob pattern for files to match
-* `defect-heatmap.exclude.enable`: enable/disable the exclude pattern (uses default excludes if disabled)
-* `defect-heatmap.exclude.pattern`: glob pattern for excluding files/folders
-* `defect-heatmap.extraGitArgs`: any extra args to pass to the git command for each line
-* `defect-heatmap.countMatch.enable`: enable/disbale alternate method for determining line temp
-* `defect-heatmap.countMatch.method`: base line temperature off of pattern matches, or line counts from command output
-* `defect-heatmap.countMatch.pattern`: pattern to use if `defect-heatmap.countMatch.method` is set to `pattern matches`
+* `activity-heatmap.include.pattern`: glob pattern for files to match
+* `activity-heatmap.exclude.enable`: enable/disable the exclude pattern (uses default excludes if disabled)
+* `activity-heatmap.exclude.pattern`: glob pattern for excluding files/folders
+* `activity-heatmap.extraGitArgs`: any extra args to pass to the git command for each line
+* `activity-heatmap.countMatch.enable`: enable/disbale alternate method for determining line temp
+* `activity-heatmap.countMatch.method`: base line temperature off of pattern matches, or line counts from command output
+* `activity-heatmap.countMatch.pattern`: pattern to use if `activity-heatmap.countMatch.method` is set to `pattern matches`
 
 ## Known Issues
 

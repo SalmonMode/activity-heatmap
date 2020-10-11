@@ -8,7 +8,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const heatmapManager = new HeatmapManager(context);
 
-	let generateHeatmapDisposable = vscode.commands.registerCommand('defect-heatmap.generate', () => {
+	let generateHeatmapDisposable = vscode.commands.registerCommand('activity-heatmap.generate', () => {
 		heatmapManager.generateHeatmap();
 		vscode.window.onDidChangeVisibleTextEditors(() => {
 			heatmapManager.renderHeatmapForVisibleTextEditors();
@@ -17,13 +17,13 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(generateHeatmapDisposable);
 
-	let showHeatmapReportDisposable = vscode.commands.registerCommand('defect-heatmap.showReport', () => {
+	let showHeatmapReportDisposable = vscode.commands.registerCommand('activity-heatmap.showReport', () => {
 		displayHeatmapReport(context, heatmapManager);
 	});
 
 	context.subscriptions.push(showHeatmapReportDisposable);
 
-	let hideHeatmapOverlay = vscode.commands.registerCommand('defect-heatmap.hideOverlay', () => {
+	let hideHeatmapOverlay = vscode.commands.registerCommand('activity-heatmap.hideOverlay', () => {
 		heatmapManager.hideDecorations = true;
 		heatmapManager.wipeOutDecorations();
 	});
@@ -79,7 +79,7 @@ class HeatmapManager {
 		this.hideDecorations = false;
 	}
 	get workspaceConfig(): vscode.WorkspaceConfiguration {
-		return vscode.workspace.getConfiguration('defect-heatmap');
+		return vscode.workspace.getConfiguration('activity-heatmap');
 	}
 	_getGitIndex(): vscode.Uri {
 		const rootUri = vscode.Uri.file(vscode.workspace.rootPath!);
@@ -89,10 +89,10 @@ class HeatmapManager {
 		return this._gitIndex;
 	}
 	async initializeCache(): Promise<void> {
-		let tempCache: any | undefined = this.context.workspaceState.get('defectHeatmap');
+		let tempCache: any | undefined = this.context.workspaceState.get('activityHeatmap');
 		if (!tempCache) {
-			await this.context.workspaceState.update('defectHeatmap', {});
-			tempCache = this.context.workspaceState.get<any>('defectHeatmap');
+			await this.context.workspaceState.update('activityHeatmap', {});
+			tempCache = this.context.workspaceState.get<any>('activityHeatmap');
 		}
 		this.cache = tempCache;
 		if (!('temps' in this.cache)) {
@@ -381,7 +381,7 @@ async function displayHeatmapReport(context: vscode.ExtensionContext, heatmapMan
 	if (!heatmapManager.initialHeatmapCacheBuilt) {
 		return;
 	}
-	const cache: any = context.workspaceState.get('defectHeatmap');
+	const cache: any = context.workspaceState.get('activityHeatmap');
 	const rootPathLength = vscode.workspace.rootPath!.length + 1;
 	// Distinguish between max line temp and max file temp here, so that the colors for overall
 	// file temps don't look closer to blue than they should be.

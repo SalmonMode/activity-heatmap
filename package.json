@@ -1,7 +1,7 @@
 {
-	"name": "defect-heatmap",
-	"displayName": "Defect Heatmap",
-	"description": "Visualize problematic lines of code",
+	"name": "activity-heatmap",
+	"displayName": "Activity Heatmap",
+	"description": "Visualize commit activity of lines of code",
 	"publisher": "salmonmode",
 	"version": "1.3.2",
 	"engines": {
@@ -11,41 +11,41 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:defect-heatmap.generate",
-		"onCommand:defect-heatmap.showReport",
-		"onCommand:defect-heatmap.hideOverlay"
+		"onCommand:activity-heatmap.generate",
+		"onCommand:activity-heatmap.showReport",
+		"onCommand:activity-heatmap.hideOverlay"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"configuration": {
-			"title": "Defect Heatmap",
+			"title": "Activity Heatmap",
 			"properties": {
-				"defect-heatmap.include.pattern": {
+				"activity-heatmap.include.pattern": {
 					"type": "string",
 					"default": "**/**",
 					"markdownDescription": "A [glob pattern](https://code.visualstudio.com/api/references/vscode-api#GlobPattern) that defines the files to search for. The glob pattern will be matched against the file paths of resulting matches relative to their workspace. Use a [relative pattern](https://code.visualstudio.com/api/references/vscode-api#RelativePattern) to restrict the search results to a [workspace folder](https://code.visualstudio.com/api/references/vscode-api#WorkspaceFolder).\n\nWarning: The more files that are included, the longer it will take to generate the heatmap."
 				},
-				"defect-heatmap.exclude.enable": {
+				"activity-heatmap.exclude.enable": {
 					"type": "boolean",
 					"default": false,
 					"markdownDescription": "Enable the exlude pattern. If disabled, exclude is treated as `undefined`, and the default excludes will apply."
 				},
-				"defect-heatmap.exclude.pattern": {
+				"activity-heatmap.exclude.pattern": {
 					"type": "string",
 					"default": "",
 					"markdownDescription": "A [glob pattern](https://code.visualstudio.com/api/references/vscode-api#GlobPattern) that defines the files and folders to exclude. The glob pattern will be matched against the file paths of resulting matches relative to their workspace. When `undefined` only default excludes will apply, when `null` no excludes will apply. If enabled, but left blank, it will be treated as `null`.\n\nWarning: The more files that are included, the longer it will take to generate the heatmap."
 				},
-				"defect-heatmap.extraGitArgs": {
+				"activity-heatmap.extraGitArgs": {
 					"type": "string",
 					"default": "",
 					"markdownDescription": "The value of this field will be added, as is, onto the end of the `git` command used to fetch the logs for each line."
 				},
-				"defect-heatmap.countMatch.enable": {
+				"activity-heatmap.countMatch.enable": {
 					"type": "boolean",
 					"default": false,
 					"markdownDescription": "Enable calculating the temperature of a line by counting either the number of times a given pattern is matched in the commit messages for that line, or the number of lines returned by the git command for that line. This is useful for when multiple commit messages might be bundled together, like with an octopus merge, or you want to have a highly customized way of calculating the temperature of each line."
 				},
-				"defect-heatmap.countMatch.pattern": {
+				"activity-heatmap.countMatch.pattern": {
 					"type": "string",
 					"default": "",
 					"markdownDescription": "If enabled, and `pattern matches` is set, the number of matches found for this regex pattern in the output of the `git log` command will be the temperature for that line."
@@ -54,16 +54,16 @@
 		},
 		"commands": [
 			{
-				"command": "defect-heatmap.generate",
-				"title": "Defect Heatmap: Generate heatmap"
+				"command": "activity-heatmap.generate",
+				"title": "Activity Heatmap: Generate heatmap"
 			},
 			{
-				"command": "defect-heatmap.showReport",
-				"title": "Defect Heatmap: Show heatmap report"
+				"command": "activity-heatmap.showReport",
+				"title": "Activity Heatmap: Show heatmap report"
 			},
 			{
-				"command": "defect-heatmap.hideOverlay",
-				"title": "Defect Heatmap: Hide heatmap color overlay"
+				"command": "activity-heatmap.hideOverlay",
+				"title": "Activity Heatmap: Hide heatmap color overlay"
 			}
 		]
 	},
@@ -94,7 +94,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/SalmonMode/defect-heatmap.git"
+		"url": "https://github.com/SalmonMode/activity-heatmap.git"
 	},
-	"homepage": "https://github.com/SalmonMode/defect-heatmap"
+	"homepage": "https://github.com/SalmonMode/activity-heatmap"
 }
