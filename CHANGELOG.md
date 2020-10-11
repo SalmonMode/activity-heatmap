@@ -6,6 +6,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [1.3.3] - 2020-10-11
+
 ### Changed
 
 - Name to "Activity Heatmap"
